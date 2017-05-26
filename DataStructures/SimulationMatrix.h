@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 #include <fstream>
+#include "DoublyLinkedList.h"
 
 using namespace std;
 
@@ -36,21 +37,30 @@ public:
 	unsigned short Rows;
 	unsigned short Columns;
 	
-
-	SimulationMatrix(unsigned short rows, unsigned short columns);
-	void printMarix();
 	
+	SimulationMatrix(unsigned short rows, unsigned short columns);
 	
 	MatrixNode *getGoalNode() const;
 	MatrixNode *getStartNode() const;
+	MatrixNode *getFirstElement() const;
+	DoublyLinkedList<MatrixNode *> *getPath();
+	bool hasSolution() const;
 
 private:
-	struct MatrixNode* goalNode = nullptr;
-	struct MatrixNode* startNode = nullptr;
-	struct MatrixNode* firstElement = nullptr;
+	struct MatrixNode *goalNode = nullptr;
+	struct MatrixNode *startNode = nullptr;
+	struct MatrixNode *firstElement = nullptr;
+	
+	
+	DoublyLinkedList<MatrixNode *> *path;
+	
+	bool solution;
 	
 	MatrixNode* generateRow( unsigned short row , unsigned short length);
 	void mixRows( MatrixNode* top , MatrixNode* bottom , unsigned short length );
+	void pathFinderAux(DoublyLinkedList<MatrixNode*>* blocked);
+	void pathFindingAStar();
+	void printMarix();
 	
 };
 

@@ -18,7 +18,7 @@
 // Represents the current state of the game
 enum SimulationState {
 	SIMULATION_LABYRINTH,
-	SIMULATION_PAUSED,
+	SIMULATION_INTERLUDE,
 	SIMULATION_START_SCREEN,
 	SIMULATION_WIN,
 	SIMULATION_PVP,
@@ -29,8 +29,8 @@ private:
 	// Simulator-related State data
 	SpriteRenderer*  Renderer = nullptr;
 	SimulationManager*     simulationManager = nullptr;
-	GLshort          lastMove = 0;
-	bool server = false;
+	bool flag = true;
+	
 	
 public:
 	// Simulator state

@@ -7,7 +7,7 @@ set(SOURCE_FILES main.cpp SimulationFramework/SOIL.h SimulationFramework/Simulat
         SimulationFramework/Shader.h SimulationFramework/Texture.cpp SimulationFramework/Texture.h SimulationFramework/ResourceManager.cpp
         SimulationFramework/ResourceManager.h SimulationFramework/SpriteRenderer.cpp SimulationFramework/SpriteRenderer.h Simulation/GameObject.cpp
         Simulation/GameObject.h Simulation/SimulationManager.cpp Simulation/SimulationManager.h DataStructures/QueueNode.h DataStructures/Queue.h
-        SimulationFramework/TextRenderer.cpp SimulationFramework/TextRenderer.h DataStructures/Stack.h Simulation/PowerUp.h DataStructures/LabyrinthMatrix.cpp DataStructures/LabyrinthMatrix.h)
+        SimulationFramework/TextRenderer.cpp SimulationFramework/TextRenderer.h DataStructures/Stack.h DataStructures/SimulationMatrix.cpp DataStructures/SimulationMatrix.h)
 
 # Find glfw header
 find_path(GLFW_INCLUDE_DIR GLFW/glfw3.h ${HEADER_SEARCH_PATH})

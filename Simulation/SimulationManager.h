@@ -14,8 +14,8 @@
 #include "../SimulationFramework/SpriteRenderer.h"
 #include "../SimulationFramework/ResourceManager.h"
 #include "../DataStructures/DoublyLinkedList.h"
-#include "PowerUp.h"
 #include "../DataStructures/Stack.h"
+#include "../DataStructures/SimulationMatrix.h"
 
 #include <glm/glm.hpp>
 #include <GL/glew.h>
@@ -28,59 +28,90 @@ public:
 	SimulationManager(GLshort width, GLshort height);
 	
 	// Colision management
-	void CheckCollision();
-	void CheckPlayerCollision();
-	void CheckEnemiesCollisions();
 	
+
 	// Render player and enemies
-	void Draw(SpriteRenderer &renderer);
-	void punch(bool player);
+	
+	
 	
 	//Movement and state update related
+	
+	
+	//Labirynth-related actions
+	void setUpMaze(bool playerColor);
+	void escape(GLfloat dt);
 	void updateShots(GLfloat dt);
-	void updatePowerUps(GLfloat dt);
+	void lControlEnemies(GLfloat dt);
+	void DrawLabyrinth(SpriteRenderer &renderer);
+	void lCheckCollisions();
+	void clearMaze();
 	
-	//Enemy-related actions
-	void ControlEnemies(GLfloat dt, GLushort enemy);
 	
-	//PLayer-related actions
-	void PressTheTrigger(GLfloat dt);
-	void ActivatePowerUp();
+	//PvP-related actions
+	void setUpPvP();
+	void DrawPvP(SpriteRenderer &renderer);
+	void PvPCheckCollisions(GLfloat dt);
+	//Animation-related actions
+	void punch(bool player);
+	void walk(bool player);
+	void kick(bool player);
+	bool isActing( bool player);
 	
-	DoublyLinkedList<PowerUp> fieldPowerUps;
+	
+	//Enviroment set up
+	
 	
 	//Getters
 	GameObject *getPlayer() ;
-	DoublyLinkedList<GameObject> &getPlayerShots() ;
-	GLshort getPlayerLifes() const;
-	Queue<GLushort> &getEnemySpawn() ;
-	GLushort getPoints() const;
-	GLushort getPlayerPowerUp();
+	GameObject *getOponent() ;
+	SimulationMatrix *getActualMaze() const;
+	const glm::vec2 &getObjPos() const;
+
 	
-	GLushort level= 1;
 
 private:
 	
 	
-	// Player management
+	// PvP management
 	GameObject *Player = nullptr;
+	GLfloat rlastPos, glastPos;
+	GLfloat gdtAttack = 0.0f;
+	GLfloat rdtAttack = 0.0f;
+	bool gisKicking = false;
+	bool risKicking = false;
+	bool gisPunching = false;
+	bool risPunching = false;
+	int iterationCounter = 0;
+	int oponentIC = 0;
+	int gWalkSecuence = 0;
+	int gPunchSecuence = 0;
+	int gKickSecuence = 0;
+	int rWalkSecuence = 0;
+	int rPunchSecuence = 0;
+	int rKickSecuence = 0;
+	
+	
+	
+	
+
+	
 	GameObject *Oponent = nullptr;
+	GLfloat dt = 0.0f;
+	
+	// intimidation zone object management
+	DoublyLinkedList<GameObject> objects;
+	DoublyLinkedList<GameObject> enemies;
+	DoublyLinkedList<GameObject> shots;
+	glm::vec2 objPos = glm::vec2(  480.0f , 0.0f );
+	
+	//Enviroment management
+	SimulationMatrix* actualMaze = nullptr;
 	
 	
+	//Labirynth-related actions
+	void generateMaze();
+	void getDirection();
 	
-	// Animation management
-	Queue<GameObject> animations;
-	
-	//Collision management
-	glm::vec4 getTruePosition(GameObject* enemy);
-	bool CheckPlayerCollisionAux(GameObject* iterator);
-	bool CheckEnemiesCollisionsAux(GameObject* auxIterator, glm::vec4 enemyPosition );
-	
-	//PowerUp management
-	Stack<PowerUp> playerPowerUps;
-
-	
-
 	
 	
 	GLushort Width, Height;

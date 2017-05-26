@@ -8,251 +8,656 @@ SimulationManager::SimulationManager(GLshort width, GLshort height){
 	
 	this->Width = width;
 	this->Height = height;
-	//Player setUp                      w/2 - playerSize.x/2    h - playerSize.y
-	Player = new GameObject( glm::vec2( width / 2 - 100.0f / 2, height - 100.0f), //Player position
-	                         glm::vec2(100.0f, 100.f),                            //Player size
-	                         ResourceManager::GetTexture("ship"));                //Player texture
-	Player->life = 500;
-	Player->tag = 1;
-	Player->Color = glm::vec3(0.0f , 1.0f , 0.0);
 }
 
-///     Colision detection and position calculation      \\\*
-void SimulationManager::CheckPlayerCollision() { // AABB - AABB collision
-	GameObject *iterator = nullptr;
-	/*
-	//Colision detection for player and enemy shots
-	if(!this->Player->hasShield){
-		for (int i = 0; i < this->enemyShots.sizeOf(); i++) {
+
+
+
+
+
+
+
+
+
+
+
+
+void SimulationManager::lControlEnemies(GLfloat dt) {
+	
+	if(this->dt >= 3.0f){
+		
+		for (int i = 0; i < enemies.sizeOf(); ++i) {
+			GameObject* enemy = enemies.get(i);
 			
-			iterator = this->enemyShots.get(i);
-			
-			// Calls tha auxilary function tho check the axis collision
-			if (this->CheckPlayerCollisionAux(iterator)) {
-				
-				Player->life -= iterator->tag * (9 + this->level);
-				
-				Texture2D auxText;
-				if (Player->life <= 0) {
-					auxText = ResourceManager::GetTexture("death");
-					playerLifes -= 1;
-					
-					//Dormir el tread un tiempo
-					
-				} else {
-					auxText = ResourceManager::GetTexture("hit");
-					
-				}
-				iterator->tag = 0;
-				this->animations.push(*new GameObject(iterator->Position,
-				                                      glm::vec2(50.0f, 50.f),
-				                                      auxText));
+			if( enemy->tag == 1){
+				shots.addLast(*new GameObject( glm::vec2( enemy->Position.x +10 , enemy->Position.y +45 ),
+				                               glm::vec2(30.0f, 30.0f),
+				                               ResourceManager::GetTexture("fireball"),
+				                               glm::vec3(1.0f),
+				                               glm::vec2(this->Player->Position.x - enemy->Position.x +10 , this->Player->Position.y - enemy->Position.y +45)));
 			}
 			
-		}
-	}
-	
-	PowerUp *PUiterator = nullptr;
-	//Colision detection for player powerUps
-	for (int i = 0; i < this->fieldPowerUps.sizeOf(); i++) {
-		
-		//Iterator gets the value of the enemy shot
-		PUiterator = this->fieldPowerUps.get(i);
-		
-		// Collision only if on both axes
-		if ( this->CheckPlayerCollisionAux( PUiterator ) ) {
-			
-			this->playerPowerUps.push_back( *PUiterator );
-			this->fieldPowerUps.remove(i);
-		}
-		
-	}*/
-}
-
-bool SimulationManager::CheckPlayerCollisionAux(GameObject* iterator){
-	
-	// Collision x-axis?
-	bool collisionX = Player->Position.x + Player->Size.x >= iterator->Position.x &&
-	                  iterator->Position.x + iterator->Size.x >= Player->Position.x;
-	// Collision y-axis?
-	bool collisionY = Player->Position.y + Player->Size.y >= iterator->Position.y &&
-	                  iterator->Position.y + iterator->Size.y >= Player->Position.y;
-	
-	return collisionX && collisionY;
-}
-
-
-void SimulationManager::CheckEnemiesCollisions() { // AABB - AABB collision
-	/*GameObject *iterator = nullptr;
-	GameObject *auxIterator = nullptr;
-	
-	//Colision detection for enemies and player bullets
-	for (int i = 0; i < this->Enemies.sizeOf(); i++) {
-		//Iterator takes the value of the limits of the enemy
-		iterator = this->Enemies.get(i);
-		if(iterator->tag !=7) {
-			glm::vec4 enemyPosition = getTruePosition(iterator);
-			
-			for (int j = 0; j < this->playerShots.sizeOf(); j++) {
-				
-				//AuxIterator takes the value of a shot
-				auxIterator = this->playerShots.get(j);
-				
-				// Calls tha auxilary function tho check the axis collision
-				if (CheckEnemiesCollisionsAux(auxIterator, enemyPosition)) {
-					
-					iterator->life -= auxIterator->tag * (29 + this->level);
-					Texture2D auxText;
-					if (iterator->life <= 0) {
-						this->points += iterator->tag;
-						if (this->points% 100 == 0){
-							this->playerLifes +=1;
-						}
-						
-						short powerUpProb = rand() % 12;
-						PowerUp *power = nullptr;
-						switch (powerUpProb) {
-							
-							case 12: {
-								// 12 represents a laser
-								power = new PowerUp(3, glm::vec3(1.0f), 30.f,
-								                    glm::vec2(iterator->Position.x, iterator->Position.y),
-								                    ResourceManager::GetTexture("laserPU"));
-								break;
-							}
-							case 11: {
-								// 11 represents missiles
-								power = new PowerUp(2, glm::vec3(1.0f), 30.f,
-								                    glm::vec2(iterator->Position.x, iterator->Position.y),
-								                    ResourceManager::GetTexture("missilePU"));
-								break;
-							}
-							case 10: {
-								// 10 represents the shield
-								power = new PowerUp(1, glm::vec3(1.0f), 30.f,
-								                    glm::vec2(iterator->Position.x, iterator->Position.y),
-								                    ResourceManager::GetTexture("shield"));
-								break;
-							}
-							default:
-								break;
-						}
-						
-						if (power != nullptr) {
-							this->fieldPowerUps.addLast(*power);
-						}
-						
-						auxText = ResourceManager::GetTexture("death");
-					} else {
-						auxText = ResourceManager::GetTexture("hit");
-					}
-					auxIterator->tag = 0;
-					this->animations.push(*new GameObject(auxIterator->Position,
-					                                      glm::vec2(50.0f, 50.f),
-					                                      auxText));
-				}
+			else{
+				shots.addLast(*new GameObject( glm::vec2( enemy->Position.x +10 , enemy->Position.y +45 ),
+				                               glm::vec2(30.0f, 30.0f),
+				                               ResourceManager::GetTexture("waterball"),
+				                               glm::vec3(1.0f),
+				                               glm::vec2(this->Player->Position.x - enemy->Position.x +10 , this->Player->Position.y - enemy->Position.y +45)));
 			}
+			
+			
 		}
 		
-	}
-	
-	
-	//Colision detection for player crashing with enemies
-	if(!this->Player->hasShield) {
-		for (int i = 0; i < this->Enemies.sizeOf(); i++) {
-			if (this->Enemies.get(i)->tag != 7) {
-				glm::vec4 enemyPosition = getTruePosition(this->Enemies.get(i));
-				
-				if (CheckEnemiesCollisionsAux(this->Player, enemyPosition)) {
-					
-					Texture2D auxText;
-					auxText = ResourceManager::GetTexture("death");
-					
-					Player->life = 0;
-					playerLifes -= 1;
-					
-					this->Enemies.get(i)->life = 0;
-					
-					//Dormir el tread un tiempo
-					
-					this->animations.push(*new GameObject(glm::vec2(enemyPosition.x, enemyPosition.z),
-					                                      glm::vec2(enemyPosition.x - enemyPosition.y,
-					                                                enemyPosition.z - enemyPosition.w),
-					                                      auxText));
-					
-					this->animations.push(*new GameObject(Player->Position,
-					                                      Player->Size,
-					                                      auxText));
-				}
-			}
-		}
-	}*/
-}
-
-bool SimulationManager::CheckEnemiesCollisionsAux(GameObject* auxIterator, glm::vec4 enemyPosition ){
-	
-	// Collision x-axis?
-	bool collisionX = auxIterator->Position.x + auxIterator->Size.x >= enemyPosition.x &&
-	                  enemyPosition.y >= auxIterator->Position.x;
-	// Collision y-axis?
-	bool collisionY = auxIterator->Position.y + auxIterator->Size.y >= enemyPosition.z &&
-	                  enemyPosition.w >= auxIterator->Position.y;
-	return collisionX && collisionY;
-}
-
-
-glm::vec4 SimulationManager::getTruePosition(GameObject* enemy) {
-	glm::vec4 position;
-	
-	
-}
-
-
-
-
-
-void SimulationManager::Draw(SpriteRenderer &renderer)
-{
-	
-	
-	
-	this->Player->Draw(renderer);
-	
-
-}
-
-///            Adds the punch secuence for a character            \\\*
-void SimulationManager::punch(bool player) {
-	//User player
-	if(player){
-		
-		GameObject temp1 = *this->Player;
-		temp1.Sprite = ResourceManager::GetTexture("gPunch1");
-		this->animations.push(temp1);
-		
-		GameObject temp2 = *this->Player;
-		temp2.Sprite = ResourceManager::GetTexture("gPunch2");
-		this->animations.push(temp2);
-		
-		GameObject temp3 = *this->Player;
-		temp3.Sprite = ResourceManager::GetTexture("gPunch3");
-		this->animations.push(temp3);
+		this->dt = 0.0f;
 		
 	}
 	else{
-		
-		GameObject temp1 = *this->Oponent;
-		temp1.Sprite = ResourceManager::GetTexture("rPunch1");
-		this->animations.push(temp1);
-		
-		GameObject temp2 = *this->Oponent;
-		temp2.Sprite = ResourceManager::GetTexture("rPunch2");
-		this->animations.push(temp2);
-		
-		GameObject temp3 = *this->Oponent;
-		temp3.Sprite = ResourceManager::GetTexture("rPunch3");
-		this->animations.push(temp3);
+		this->dt += dt;
 	}
+	
+	
+	
+
+
+}
+
+void SimulationManager::updateShots(GLfloat dt) {
+	
+	
+	GameObject* iterator = nullptr;
+	for (int i = 0; i < this->shots.sizeOf(); ++i) {
+		iterator = this->shots.get(i);
+		iterator->Position.x += iterator->Velocity.x * dt;
+		iterator->Position.y += iterator->Velocity.y * dt;
+	}
+}
+
+void SimulationManager::generateMaze() {
+	
+	this->actualMaze = new SimulationMatrix(10 , 10);
+	
+	if(!this->actualMaze->hasSolution()){
+		this->generateMaze();
+	}
+}
+
+void SimulationManager::setUpMaze(bool playerColor) {
+	
+	//Player setUp                      w/2 - playerSize.x/2    h - playerSize.y
+	//true is green
+	if( playerColor ){
+		Player = new GameObject( glm::vec2( 480.0f , 0.0f), //Player position
+		                         glm::vec2(100.0f, 90.0f),                            //Player size
+		                         ResourceManager::GetTexture("tv_g1"));                //Player texture
+		Player->tag = 1;
+		
+	}
+	else{
+		Player = new GameObject( glm::vec2( 480.0f , 0.0f), //Player position
+		                         glm::vec2(100.0f, 90.0f),                            //Player size
+		                         ResourceManager::GetTexture("tv_r1"));                //Player texture
+		Player->tag = 2;
+	}
+	
+	this->generateMaze();
+	
+	int x = 0;
+	int y = 0;
+	int counter = 1;
+	
+	MatrixNode* rowptr = this->actualMaze->getFirstElement();
+	MatrixNode* columnptr = rowptr;
+	bool flag = true;
+	
+	for (int row = 0; row < this->actualMaze->Rows; row++) {
+		
+		for (int column = 0; column <  this->actualMaze->Columns; column++) {
+			if((columnptr->value == 1) && (counter%6 == 0)){
+				GameObject* enemy;
+				
+				if(flag){
+					enemy = new GameObject( glm::vec2( x , y ),
+					                       glm::vec2(120.0f, 90.0f),
+					                       ResourceManager::GetTexture("charizard"));
+					enemy->tag = 1;
+					
+					
+				
+					
+				}
+				else{
+					
+					
+					enemy =new GameObject( glm::vec2( x , y ),
+					                       glm::vec2(120.0f, 90.0f),
+					                       ResourceManager::GetTexture("gyarados"));
+					enemy->tag = 2;
+					
+					
+				}
+				
+				enemies.addLast( *enemy );
+				flag = !flag;
+				
+			
+				
+				
+			}
+			else if((columnptr->value == 1) && !(counter%6 == 0)){
+				objects.addLast( *new GameObject( glm::vec2( x , y ),
+				                                  glm::vec2(120.0f, 90.0f),
+				                                  ResourceManager::GetTexture("rock")));
+			}
+			
+			counter+= 1;
+			x += 120.0f;
+			columnptr = columnptr->right;
+		}
+		
+		x = 0.0f;
+		y += 90.0f;
+		rowptr = rowptr->bottom;
+		columnptr = rowptr;
+	}
+}
+
+void SimulationManager::getDirection() {
+
+	
+	if( (*this->actualMaze->getPath()->get(0))->top ==  *this->actualMaze->getPath()->get(1)){
+		
+		this->objPos.y -= 90.0f;
+		
+	}
+	else if( (*this->actualMaze->getPath()->get(0))->bottom ==  *this->actualMaze->getPath()->get(1)){
+		
+		this->objPos.y += 90.0f;
+		
+	}
+	else if( (*this->actualMaze->getPath()->get(0))->left ==  *this->actualMaze->getPath()->get(1)){
+		
+		this->objPos.x -= 120.0f;
+		
+	}
+	else if( (*this->actualMaze->getPath()->get(0))->right ==  *this->actualMaze->getPath()->get(1)){
+		
+		this->objPos.x += 120.0f;
+		
+	}
+	this->actualMaze->getPath()->remove(0);
+	
+}
+
+void SimulationManager::escape(GLfloat dt) {
+	
+	if( (this->Player->Position.x -5 < this->objPos.x) && (this->objPos.x < this->Player->Position.x +5) &&
+			(this->Player->Position.y -5 < this->objPos.y) && (this->objPos.y < this->Player->Position.y +5) &&
+			( this->actualMaze->getPath()->sizeOf() > 1)){
+		this->getDirection();
+	}
+	
+	int x = abs( this->objPos.x - this->Player->Position.x );
+	int y = abs( this->objPos.y - this->Player->Position.y );
+	GLfloat velocity= 5000.0f * dt;
+	if( this->objPos.x > this->Player->Position.x ){
+		this->Player->Position.x += dt*velocity;
+		if( x > y){
+			this->Player->Rotation = -3.14 / 2;
+		}
+		
+	}
+	else if( this->objPos.x < this->Player->Position.x ){
+		this->Player->Position.x -= dt*velocity;
+		if( x > y){
+			this->Player->Rotation = 3.14 / 2;
+		}
+	}
+	
+	if( this->objPos.y > this->Player->Position.y ){
+		this->Player->Position.y += dt*velocity;
+		if( x < y){
+			this->Player->Rotation = 0;
+		}
+	}
+	else if( this->objPos.y < this->Player->Position.y ){
+		this->Player->Position.y -= dt*velocity;
+		if( x < y){
+			this->Player->Rotation = 3.14;
+		}
+	}
+	
+	
+	
+}
+
+void SimulationManager::DrawLabyrinth(SpriteRenderer &renderer) {
+	
+	for (int i = 0; i < enemies.sizeOf(); i++) {
+		(enemies.get(i))->Draw(renderer);
+	}
+	
+	for (int i = 0; i < objects.sizeOf(); i++) {
+		(objects.get(i))->Draw(renderer);
+	}
+	
+	for (int i = 0; i < shots.sizeOf(); i++) {
+		(shots.get(i))->Draw(renderer);
+	}
+	
+	
+	this->Player->Draw(renderer);
+	iterationCounter += 1;
+	
+	if( (Player->tag == 1) && (iterationCounter%30 == 15)) {
+		this->Player->Sprite = ResourceManager::GetTexture("tv_g2");
+	}
+	else if( (Player->tag == 1) && (iterationCounter%30 == 0)) {
+		this->Player->Sprite = ResourceManager::GetTexture("tv_g1");
+	}
+	else if ( (Player->tag == 2) && (iterationCounter%30 == 15)) {
+		this->Player->Sprite = ResourceManager::GetTexture("tv_r2");
+	}
+	else if ( (Player->tag == 2) && (iterationCounter%30 == 0)){
+		this->Player->Sprite = ResourceManager::GetTexture("tv_r1");
+		iterationCounter = 0;
+	}
+	
+	
+	
+}
+
+void SimulationManager::lCheckCollisions() {
+	
+	for (int i = 0; i < this->shots.sizeOf(); i++) {
+		GameObject* shot = shots.get(i);
+	
+		if( ((shot->Position.x + shot->Size.x > Player->Position.x +10) && (shot->Position.x < Player->Position.x +90)) &&
+				( (shot->Position.y + shot->Size.y > Player->Position.y +15) && (shot->Position.y < Player->Position.y +50)) ){
+		
+			Player->life -= 5;
+			shots.remove(i);
+			cout << "player has been hit" << endl;
+		}
+		if( (shot->Position.x >= 1200) || (shot->Position.x + shot->Size.x <= 0) || (shot->Position.y < 0) || (shot->Position.y - shot->Size.y >= 900) ){
+			
+			shots.remove(i);
+		}
+		
+	}
+	
+}
+
+void SimulationManager::clearMaze() {
+	
+	int a = enemies.sizeOf();
+	for (int i = 0; i < a; i++) {
+		(enemies.remove(0));
+	}
+	
+	a = objects.sizeOf();
+	for (int i = 0; i < a; i++) {
+		(objects.remove(0));
+	}
+	
+	a = shots.sizeOf();
+	for (int i = 0; i < a; i++) {
+		(shots.remove(0));
+	}
+	actualMaze = nullptr;
+	Player = nullptr;
+	objPos = glm::vec2(  480.0f , 0.0f );
+	
+}
+
+
+
+///            PvP-related             \\\*
+void SimulationManager::setUpPvP() {
+	
+	this->iterationCounter = 0;
+	this->Player = new GameObject( glm::vec2( 300.0f , 700.0f),                               //Player position
+	                                   glm::vec2(150.0f, 200.0f),                            //Player size
+	                                   ResourceManager::GetTexture("rPunch2"));              //Player texture
+	
+	//Tag va a ser el coeficiente de daño físico
+	Player->tag = 5;
+	Player->life = 100;
+
+	
+	this->Oponent = new GameObject( glm::vec2( 900.0f , 700.0f),                            //Player position
+	                                glm::vec2(150.0f, 200.0f),                             //Player size
+	                                ResourceManager::GetTexture("gPunch3"));               //Player texture
+	Oponent->tag = 5;
+	Oponent->life = 100;
+}
+
+///     Colision detection and position calculation      \\\*
+void SimulationManager::PvPCheckCollisions(GLfloat dt) { // AABB - AABB collision
+	
+	if( risKicking && (rKickSecuence > 7) && (rdtAttack > 0.3f) &&
+			(Oponent->Position.x <= Player->Position.x + 130) && (Oponent->Position.x + Oponent->Size.x > Player->Position.x +130) ){
+		Oponent->life -= Player->tag * 0.75;
+		rdtAttack = 0.0f;
+		cout << "op has been kicked" << endl;
+	}
+	else if( risPunching && (rPunchSecuence > 14) && (rdtAttack > 0.3f) &&
+	    (Oponent->Position.x <= Player->Position.x + 135) && (Oponent->Position.x + Oponent->Size.x > Player->Position.x +135) ){
+		Oponent->life -= Player->tag * 0.4;
+		rdtAttack = 0.0f;
+		cout << "op has been punched" << endl;
+	}
+	else{
+		rdtAttack += dt;
+	}
+	
+	if( gisKicking && (gKickSecuence > 7) && (gdtAttack > 0.3f) &&
+			(Player->Position.x <= Oponent->Position.x + 15) && (Player->Position.x + Player->Size.x > Oponent->Position.x +15) ){
+		Player->life -= Oponent->tag * 0.75;
+		gdtAttack = 0.0f;
+		cout << "pl has been kicked" << endl;
+	}
+	else if( gisPunching && (gPunchSecuence > 14) && (gdtAttack > 0.3f) &&
+			(Player->Position.x <= Oponent->Position.x + 15) && (Player->Position.x + Player->Size.x > Oponent->Position.x +15) ){
+		Player->life -= Oponent->tag * 0.4;
+		gdtAttack = 0.0f;
+		cout << "pl has been punched" << endl;
+	}
+	else{
+		gdtAttack += dt;
+	}
+	
+	
+	
+	
+}
+
+void SimulationManager::DrawPvP(SpriteRenderer &renderer) {
+
+	
+	this->Player->Draw(renderer);
+	this->iterationCounter += 1;
+	if( (iterationCounter % 66 == 33) && (rlastPos == Player->Position.x) && (!isActing(true)) ){
+		
+		Player->Sprite = ResourceManager::GetTexture("rPunch1");
+		Player->Size.x = 150.0f;
+		
+	
+	}
+	else if( (iterationCounter % 66 == 0) && (rlastPos == Player->Position.x) && (!isActing(true)) ){
+		
+		Player->Sprite = ResourceManager::GetTexture("rPunch2");
+		iterationCounter = 0;
+		Player->Size.x = 150.0f;
+	}
+	this->rlastPos = Player->Position.x;
+	
+	
+	this->Oponent->Draw(renderer);
+	this->oponentIC += 1;
+	if( (oponentIC % 66 == 33) && (glastPos == Oponent->Position.x) && (!isActing(false)) ){
+		
+		Oponent->Sprite = ResourceManager::GetTexture("gPunch1");
+		Oponent->Size.x = 150.0f;
+		
+	}
+	else if( (oponentIC % 66 == 0) && (glastPos == Oponent->Position.x) && (!isActing(false)) ){
+		
+		Oponent->Sprite = ResourceManager::GetTexture("gPunch2");
+		oponentIC = 0;
+		Oponent->Size.x = 150.0f;
+	}
+	this->glastPos = Oponent->Position.x;
+	
+}
+
+
+///            Adds the animation secuence for a character            \\\*
+
+void SimulationManager::punch(bool player) {
+	//User player
+	//true is red
+	if(player){
+		
+		switch(rPunchSecuence % 21){
+			
+			case 0:{
+				this->Player->Sprite = ResourceManager::GetTexture("rPunch1");
+				
+				if( rPunchSecuence == 0){
+					this->risPunching = true;
+				}
+				else if( rPunchSecuence == 21){
+					this->risPunching = false;
+					rPunchSecuence = -1;
+				}
+				
+				break;
+			}
+			
+			case 7:{
+				this->Player->Sprite = ResourceManager::GetTexture("rPunch2");
+				break;
+			}
+			
+			case 14:{
+				this->Player->Sprite = ResourceManager::GetTexture("rPunch3");
+				break;
+			}
+			
+		}
+		
+		rPunchSecuence += 1;
+		
+	}
+	else{
+		//false is green
+		switch(gPunchSecuence % 21){
+			
+			case 0:{
+				this->Oponent->Sprite = ResourceManager::GetTexture("gPunch1");
+				
+				if( gPunchSecuence == 0){
+					this->gisPunching = true;
+				}
+				else if( gPunchSecuence == 21){
+					this->gisPunching = false;
+					gPunchSecuence = -1;
+				}
+				break;
+			}
+			
+			case 7:{
+				this->Oponent->Sprite = ResourceManager::GetTexture("gPunch2");
+				break;
+			}
+			
+			case 14:{
+				this->Oponent->Sprite = ResourceManager::GetTexture("gPunch3");
+				break;
+			}
+			
+		}
+		
+		gPunchSecuence += 1;
+	}
+	
+}
+
+
+void SimulationManager::kick(bool player) {
+	
+	//User player
+	//true is red
+	if(player){
+		
+		switch(rKickSecuence % 14){
+			
+			case 0:{
+				this->Player->Sprite = ResourceManager::GetTexture("rKick1");
+				
+				if( rKickSecuence == 0){
+					this->risKicking = true;
+				}
+				else if( rKickSecuence == 14){
+					this->risKicking = false;
+					rKickSecuence = -1;
+				}
+				
+				break;
+			}
+			
+			case 7:{
+				this->Player->Sprite = ResourceManager::GetTexture("rKick2");
+				break;
+			}
+
+			
+		}
+		
+		rKickSecuence += 1;
+		
+	}
+	else{
+		//false is green
+		switch(gKickSecuence % 14){
+			
+			case 0:{
+				this->Oponent->Sprite = ResourceManager::GetTexture("gKick1");
+				
+				if( gKickSecuence == 0){
+					this->gisKicking = true;
+				}
+				else if( gKickSecuence == 14){
+					this->gisKicking = false;
+					gKickSecuence = -1;
+				}
+				break;
+			}
+			
+			case 7:{
+				this->Oponent->Sprite = ResourceManager::GetTexture("gKick2");
+				break;
+			}
+			
+		}
+		
+		gKickSecuence += 1;
+	}
+	
+}
+
+
+
+void SimulationManager::walk(bool player) {
+	
+	//User player
+	//true is red
+	if(player){
+		
+		switch(rWalkSecuence % 60){
+			
+			case 0:{
+				this->Player->Sprite = ResourceManager::GetTexture("rWalk1");
+				rWalkSecuence = 0;
+				break;
+			}
+			
+			case 10:{
+				this->Player->Sprite = ResourceManager::GetTexture("rWalk2");
+				break;
+			}
+			
+			case 20:{
+				this->Player->Sprite = ResourceManager::GetTexture("rWalk3");
+				break;
+			}
+			
+			case 30:{
+				this->Player->Sprite = ResourceManager::GetTexture("rWalk4");
+				break;
+			}
+			
+			case 40:{
+				this->Player->Sprite = ResourceManager::GetTexture("rWalk5");
+				break;
+			}
+			
+			case 50:{
+				this->Player->Sprite = ResourceManager::GetTexture("rWalk6");
+				break;
+			}
+			
+		}
+		
+		rWalkSecuence += 1;
+		
+	}
+	else{
+		//false is green
+		switch(gWalkSecuence % 60){
+			
+			case 0:{
+				this->Oponent->Sprite = ResourceManager::GetTexture("gWalk1");
+				gWalkSecuence = 0;
+				break;
+			}
+			
+			case 10:{
+				this->Oponent->Sprite = ResourceManager::GetTexture("gWalk2");
+				break;
+			}
+			
+			case 20:{
+				this->Oponent->Sprite = ResourceManager::GetTexture("gWalk3");
+				break;
+			}
+			
+			case 30:{
+				this->Oponent->Sprite = ResourceManager::GetTexture("gWalk4");
+				break;
+			}
+			
+			case 40:{
+				this->Oponent->Sprite = ResourceManager::GetTexture("gWalk5");
+				break;
+			}
+			
+			case 50:{
+				this->Oponent->Sprite = ResourceManager::GetTexture("gWalk6");
+				break;
+			}
+			
+		}
+		
+		gWalkSecuence += 1;
+	}
+	
+	risKicking = false;
+	risPunching = false;
+	gisKicking = false;
+	gisPunching = false;
+	
+}
+
+
+
+
+bool SimulationManager::isActing(bool player) {
+	
+	bool state;
+	
+	//User player
+	//true is red
+	if(player){
+		state = risKicking || risPunching;
+	}
+	
+	else{
+		state = gisKicking || gisPunching;
+		
+	}
+	
+	return state;
 	
 }
 
@@ -260,10 +665,22 @@ void SimulationManager::punch(bool player) {
 
 
 
-///            Enemy-related             \\\*
-void SimulationManager::ControlEnemies(GLfloat dt, GLushort enemyPos)
-{
 
+
+GameObject *SimulationManager::getPlayer() {
+	return this->Player;
+}
+
+SimulationMatrix *SimulationManager::getActualMaze() const {
+	return actualMaze;
+}
+
+const glm::vec2 &SimulationManager::getObjPos() const {
+	return objPos;
+}
+
+GameObject *SimulationManager::getOponent()  {
+	return Oponent;
 }
 
 

@@ -20,7 +20,7 @@ enum SimulationState {
 	SIMULATION_LABYRINTH,
 	SIMULATION_INTERLUDE,
 	SIMULATION_START_SCREEN,
-	SIMULATION_WIN,
+	SIMULATION_END,
 	SIMULATION_PVP,
 };
 
@@ -30,6 +30,7 @@ private:
 	SpriteRenderer*  Renderer = nullptr;
 	SimulationManager*     simulationManager = nullptr;
 	bool flag = true;
+	bool isPvp = true;
 	
 	
 public:

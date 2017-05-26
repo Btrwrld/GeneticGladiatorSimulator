@@ -3,6 +3,7 @@
 //
 
 #include "SimulationManager.h"
+#include "../Server/HttpRequester.h"
 
 SimulationManager::SimulationManager(GLshort width, GLshort height){
 	
@@ -85,19 +86,52 @@ void SimulationManager::setUpMaze(bool playerColor) {
 	
 	//Player setUp                      w/2 - playerSize.x/2    h - playerSize.y
 	//true is green
+	string pdata = getIndividuo();
+	char data[1024];
+	strncpy(data, pdata.c_str(), sizeof(data));
+	data[sizeof(data) - 1] = 0;
+	
+	
 	if( playerColor ){
 		Player = new GameObject( glm::vec2( 480.0f , 0.0f), //Player position
 		                         glm::vec2(100.0f, 90.0f),                            //Player size
 		                         ResourceManager::GetTexture("tv_g1"));                //Player texture
 		Player->tag = 1;
 		
+		
+		
+		int a = 0;
+		for(int i = 0; i < 6; i++){
+			oAttributes.push(data[a] - '0');
+			a += 2;
+		}
+		
+		Player->life = *oAttributes.get() * 10;
+		oAttributes.dequeue();
+		Player->Velocity.x = *oAttributes.get() * 1000;
+		oAttributes.dequeue();
 	}
 	else{
 		Player = new GameObject( glm::vec2( 480.0f , 0.0f), //Player position
 		                         glm::vec2(100.0f, 90.0f),                            //Player size
 		                         ResourceManager::GetTexture("tv_r1"));                //Player texture
 		Player->tag = 2;
+		
+		
+		int a = 0;
+		for(int i = 0; i < 6; i++){
+			pAttributes.push(data[a] - '0');
+			a += 2;
+		}
+		
+		Player->life = *pAttributes.get() * 10;
+		pAttributes.dequeue();
+		Player->Velocity.x = *pAttributes.get() * 1000;
+		pAttributes.dequeue();
 	}
+	
+	
+	
 	
 	this->generateMaze();
 	
@@ -198,29 +232,28 @@ void SimulationManager::escape(GLfloat dt) {
 	
 	int x = abs( this->objPos.x - this->Player->Position.x );
 	int y = abs( this->objPos.y - this->Player->Position.y );
-	GLfloat velocity= 5000.0f * dt;
 	if( this->objPos.x > this->Player->Position.x ){
-		this->Player->Position.x += dt*velocity;
+		this->Player->Position.x += dt*dt*this->Player->Velocity.x;
 		if( x > y){
 			this->Player->Rotation = -3.14 / 2;
 		}
 		
 	}
 	else if( this->objPos.x < this->Player->Position.x ){
-		this->Player->Position.x -= dt*velocity;
+		this->Player->Position.x -= dt*dt*this->Player->Velocity.x;
 		if( x > y){
 			this->Player->Rotation = 3.14 / 2;
 		}
 	}
 	
 	if( this->objPos.y > this->Player->Position.y ){
-		this->Player->Position.y += dt*velocity;
+		this->Player->Position.y += dt*dt*this->Player->Velocity.x;
 		if( x < y){
 			this->Player->Rotation = 0;
 		}
 	}
 	else if( this->objPos.y < this->Player->Position.y ){
-		this->Player->Position.y -= dt*velocity;
+		this->Player->Position.y -= dt*dt*this->Player->Velocity.x;
 		if( x < y){
 			this->Player->Rotation = 3.14;
 		}
@@ -320,15 +353,19 @@ void SimulationManager::setUpPvP() {
 	                                   ResourceManager::GetTexture("rPunch2"));              //Player texture
 	
 	//Tag va a ser el coeficiente de daño físico
-	Player->tag = 5;
-	Player->life = 100;
+	Player->tag = *pAttributes.get();
+	pAttributes.dequeue();
+	Player->life = *pAttributes.get() * 10;
+	pAttributes.dequeue();
 
 	
 	this->Oponent = new GameObject( glm::vec2( 900.0f , 700.0f),                            //Player position
 	                                glm::vec2(150.0f, 200.0f),                             //Player size
 	                                ResourceManager::GetTexture("gPunch3"));               //Player texture
-	Oponent->tag = 5;
-	Oponent->life = 100;
+	Oponent->tag = *oAttributes.get();
+	oAttributes.dequeue();
+	Oponent->life = *oAttributes.get() * 10;
+	oAttributes.dequeue();
 }
 
 ///     Colision detection and position calculation      \\\*
@@ -665,6 +702,20 @@ bool SimulationManager::isActing(bool player) {
 
 
 
+void SimulationManager::cleanAttributes() {
+	
+	int a = this->oAttributes.sizeOf();
+	for (int i = 0; i < a; ++i) {
+		oAttributes.dequeue();
+	}
+	
+	a = this->pAttributes.sizeOf();
+	for (int j = 0; j < a; ++j) {
+		pAttributes.dequeue();
+	}
+	
+}
+
 
 
 GameObject *SimulationManager::getPlayer() {
@@ -682,6 +733,7 @@ const glm::vec2 &SimulationManager::getObjPos() const {
 GameObject *SimulationManager::getOponent()  {
 	return Oponent;
 }
+
 
 
 

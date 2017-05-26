@@ -46,6 +46,7 @@ public:
 	void lCheckCollisions();
 	void clearMaze();
 	
+	void cleanAttributes();
 	
 	//PvP-related actions
 	void setUpPvP();
@@ -91,8 +92,6 @@ private:
 	int rKickSecuence = 0;
 	
 	
-	
-	
 
 	
 	GameObject *Oponent = nullptr;
@@ -106,7 +105,8 @@ private:
 	
 	//Enviroment management
 	SimulationMatrix* actualMaze = nullptr;
-	
+	Queue<int> pAttributes;
+	Queue<int> oAttributes;
 	
 	//Labirynth-related actions
 	void generateMaze();

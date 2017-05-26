@@ -100,7 +100,6 @@ void Simulator::Init() {
 	textRenderer = new TextRenderer(this->Width, this->Height);
 	textRenderer->Load("/home/erick/CLionProjects/GeneticGladiatorSimulator/fonts/OCRAEXT.TTF", 24);
 	this->State = SIMULATION_START_SCREEN;
-	
 }
 
 
@@ -161,9 +160,12 @@ void Simulator::Render()
 		
 		simulationManager->DrawLabyrinth(*Renderer);
 		
-		if( (abs(simulationManager->getPlayer()->Position.x - 480.0f) < 5) &&
-				(abs(simulationManager->getPlayer()->Position.y - 810.f) < 5)){
-			simulationManager->clearMaze();
+		if( ((abs(simulationManager->getPlayer()->Position.x - 480.0f) < 5) &&
+				(abs(simulationManager->getPlayer()->Position.y - 810.f) < 5)) || (simulationManager->getPlayer()->life <= 0)  ){
+			if (simulationManager->getPlayer()->life <= 0){
+				this->isPvp = false;
+				cout << "El gladiador ha muerto" << endl ;
+			}
 			this->State = SIMULATION_INTERLUDE;
 		}
 		
@@ -177,6 +179,15 @@ void Simulator::Render()
 		Renderer->DrawSprite(backGround, glm::vec2(0, 0), glm::vec2(this->Width, this->Height), 0.0f);
 		
 		simulationManager->DrawPvP(*Renderer);
+		
+		if(simulationManager->getPlayer()->life <= 0 ) {
+			this->State = SIMULATION_END;
+			cout << "El gladiador verde ha ganado" << endl;
+		}
+		else if(simulationManager->getOponent()->life <= 0 ) {
+			this->State = SIMULATION_END;
+			cout << "El gladiador rojo ha ganado" << endl ;
+		}
 		
 	}
 	
@@ -197,10 +208,29 @@ void Simulator::Render()
 			textRenderer->RenderText(
 					"Simulacion del segundo gladiador finalizada.", 200.0, Height / 2 - 20.0, 1.0, glm::vec3(0.0, 1.0, 0.0)
 			);
-			textRenderer->RenderText(
-					"Presiona ENTER para continuar con PvP.", 200.0, Height / 2, 1.0, glm::vec3(1.0, 1.0, 0.0)
-			);
+			if(isPvp){
+				textRenderer->RenderText(
+						"Presiona ENTER para continuar con PvP.", 200.0, Height / 2, 1.0, glm::vec3(1.0, 1.0, 0.0)
+				);
+			}
+			else{
+				textRenderer->RenderText(
+						"Presiona ENTER para continuar con la otra generacion.", 200.0, Height / 2, 1.0, glm::vec3(1.0, 1.0, 0.0)
+				);
+			}
+			
 		}
+		
+	}
+	
+	else if(this->State == SIMULATION_END){
+		
+		textRenderer->RenderText(
+				"Simulacion finalizada.", 200.0, Height / 2 - 20.0, 1.0, glm::vec3(0.0, 1.0, 0.0)
+		);
+		textRenderer->RenderText(
+				"Presiona ENTER para continuar.", 200.0, Height / 2, 1.0, glm::vec3(1.0, 1.0, 0.0)
+		);
 		
 	}
 	
@@ -280,19 +310,42 @@ void Simulator::ProcessInput(GLfloat dt) {
 			break;
 			
 		}
+		case(SIMULATION_END): {
+			
+			if (this->Keys[GLFW_KEY_ENTER]) {
+				this->State =SIMULATION_LABYRINTH;
+				simulationManager->clearMaze();
+				simulationManager->cleanAttributes();
+				simulationManager->setUpMaze(false);
+				this->flag = true;
+				this->isPvp = true;
+				
+			}
+			break;
+			
+		}
 		
 		case(SIMULATION_INTERLUDE): {
 			
 			if (this->Keys[GLFW_KEY_ENTER]) {
-				
+				simulationManager->clearMaze();
 				if(!flag){
-					this->State = SIMULATION_PVP;
-					simulationManager->setUpPvP();
-				}
-				else{
-					this->State = SIMULATION_LABYRINTH;
-					simulationManager->setUpMaze(true);
-					flag = !flag;
+					if(isPvp){
+						this->State = SIMULATION_PVP;
+						simulationManager->setUpPvP();
+					}
+					else {
+						this->State = SIMULATION_LABYRINTH;
+						simulationManager->cleanAttributes();
+						simulationManager->setUpMaze(false);
+						this->flag = true;
+						this->isPvp = true;
+					}
+			}
+			else{
+				this->State = SIMULATION_LABYRINTH;
+				simulationManager->setUpMaze(true);
+				flag = !flag;
 				}
 				
 			}
